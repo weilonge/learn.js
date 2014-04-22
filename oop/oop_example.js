@@ -1,5 +1,3 @@
-var personsList = [];
-
 //console.log('===== Class Person ==================');
 var Person = function (){
 	console.log('Constructor: Person');
@@ -30,11 +28,7 @@ var Student = function(){
 		return "I'm a student. " + this.name + " : " + this.birthday;
 	}
 }
-
 Student.prototype = Object.create( Person.prototype );
-
-//Student.prototype = new Person();
-//Student.prototype.constructor = Student; 
 
 //console.log('===== Class Teacher ==================');
 var Teacher = function(){
@@ -44,11 +38,7 @@ var Teacher = function(){
 		return "I'm an teacher. " + this.name + " : " + this.birthday;
 	}
 }
-
 Teacher.prototype = Object.create( Person.prototype );
-
-//Teacher.prototype = new Person();
-//Teacher.prototype.constructor = Teacher; 
 
 //console.log('===== Class MathTeacher ==================');
 var MathTeacher = function(){
@@ -58,11 +48,11 @@ var MathTeacher = function(){
 		return "I'm an math teacher. " + this.name + " : " + this.birthday;
 	}
 }
-
 MathTeacher.prototype = Object.create( Teacher.prototype );
 
-//Teacher.prototype = new Person();
-//Teacher.prototype.constructor = Teacher; 
+(function(){
+
+var personsList = [];
 
 console.log('===== Create Student 1 ==================');
 var c1 = new Student;
@@ -98,3 +88,5 @@ for(var o in personsList){
 		console.log(personsList[o].sayHello());
 	}
 }
+
+})();
