@@ -6,49 +6,49 @@ var Person = function (){
 };
 Person.prototype.getName = function(){
 	return this.name;
-}
+};
 Person.prototype.setName = function(name){
 	this.name = name;
-}
+};
 Person.prototype.getBirthday = function(){
 	return this.birthday;
-}
+};
 Person.prototype.setBirthday = function(birthday){
 	this.birthday = birthday;
-}
+};
 Person.prototype.sayHello = function(){
 	return this.name + " : " + this.birthday;
-}
+};
 
 //console.log('===== Class Student ==================');
 var Student = function(){
 	Person.call(this);
 	console.log('Constructor: Student');
-}
+};
+Student.prototype = Object.create( Person.prototype );
 Student.prototype.sayHello = function(){
 	return "I'm a student. " + this.name + " : " + this.birthday;
-}
-Student.prototype = Object.create( Person.prototype );
+};
 
 //console.log('===== Class Teacher ==================');
 var Teacher = function(){
 	Person.call(this);
 	console.log('Constructor: Teacher');
-}
+};
+Teacher.prototype = Object.create( Person.prototype );
 Teacher.prototype.sayHello = function(){
 	return "I'm an teacher. " + this.name + " : " + this.birthday;
-}
-Teacher.prototype = Object.create( Person.prototype );
+};
 
 //console.log('===== Class MathTeacher ==================');
 var MathTeacher = function(){
 	Teacher.call(this);
 	console.log('Constructor: MathTeacher');
-}
+};
+MathTeacher.prototype = Object.create( Teacher.prototype );
 MathTeacher.prototype.sayHello = function(){
 	return "I'm an math teacher. " + this.name + " : " + this.birthday;
-}
-MathTeacher.prototype = Object.create( Teacher.prototype );
+};
 
 (function(){
 
