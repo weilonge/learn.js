@@ -26,7 +26,7 @@ Storage._handleJson = function (xmlhttp, cb){
 Storage.quota = function (cb){
   var self = this;
   var xmlhttp = new XMLHttpRequest();
-  xmlhttp.open('GET', '/qoo/', true);
+  xmlhttp.open('GET', '/API-v1/', true);
   xmlhttp.setRequestHeader('Accept', 'application/json');
   xmlhttp.onload = function () {
     console.log(xmlhttp.responseText);
@@ -67,9 +67,10 @@ document.getElementById('uninstall').onclick = function (){
 document.getElementById('install').onclick = function (){
   console.log('install');
   navigator.serviceWorker.register('/worker.js', {
-    scope: '/qoo/'
+    scope: './'
   }).then(function(reg) {
     console.log('OK', reg);
+    window.location.reload(false); // Reload the page to launch service worker
   }, function(err) {
     console.log('Error', err);
   });
