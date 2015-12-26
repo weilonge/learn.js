@@ -59,6 +59,7 @@ document.getElementById('uninstall').onclick = function (){
       console.log(r);
       r.unregister().then(function (b) {
         console.log(b);
+        window.location.reload(false);
       });
     });
   });
@@ -76,3 +77,7 @@ document.getElementById('install').onclick = function (){
   });
 
 };
+
+navigator.serviceWorker.getRegistrations().then(function (a){
+  console.log(a.length);
+});
