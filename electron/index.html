@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Title of the document</title>
+  <style>
+    .bigger {
+      width: 150px;
+    }
+    .smaller {
+      width: 100px;
+    }
+    #iframeContainer {
+      height:160px;
+      width: 160px;
+      border: solid 5px black;
+    }
+  </style>
+</head>
+<body id="oooo">
+  <button id="resizeWindow">Resize Window</button>
+  <div id="iframeContainer">
+    <iframe id="iframeInt" src="./index_inner.html" width="100px" height="150px" frameborder="0" scrolling="no"></iframe>
+  </div>
+
+<script>
+
+var state = false;
+
+function resizeChild() {
+  log('resizeChild BEGIN');
+  document.getElementById('iframeInt').className = state ? "smaller" : "bigger";
+  state = !state;
+  log('resizeChild ENDDD');
+}
+
+function log(str){
+  var node = document.createElement("div");                 // Create a <li> node
+  node.innerHTML = str;
+  document.getElementById('oooo').appendChild(node);
+}
+
+document.getElementById('resizeWindow').addEventListener("click", resizeChild);
+</script>
+</body>
+</html>
+
