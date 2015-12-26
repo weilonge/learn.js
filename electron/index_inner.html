@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Title of the document</title>
+  <style>
+    body {
+      background-color: green;
+    }
+    #innerHtml {
+      color: red;
+      background-color: blue;
+      width: 50%;
+      height: 50%;
+    }
+  </style>
+</head>
+<body>
+  <input id="state" type="checkbox">Get width<br>
+  <button id="resizeMe">Resize Me</button>
+  <div id="innerHtml">Inner HTML</div>
+
+<script>
+window.addEventListener("resize", function () {
+  log('innerHtml RESIZE!!!!!');
+}, false);
+
+var log = window.parent.log;
+
+document.getElementById('resizeMe').addEventListener("click", function () {
+  log('A BEGIN');
+
+  var state = document.getElementById('state').checked;
+  window.parent.resizeChild();
+
+  var view = document.getElementById('innerHtml');
+  var computedStyle = window.getComputedStyle(view);
+
+  if(state){
+    var viewWidth = view.getBoundingClientRect().width;
+    var viewFont = computedStyle.fontFamily;
+    //var innerWidth = window.innerWidth;
+  }
+  state = !state;
+
+  log('A ENDDD');
+});
+
+</script>
+
+
+</body>
+
+</html>
+
