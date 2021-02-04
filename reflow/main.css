@@ -1,0 +1,51 @@
+body {
+  overflow: hidden;
+}
+
+#container {
+  width: 500px;
+  height: 500px;
+  margin: 100px;
+  border: 10px solid black;
+}
+
+#A {
+  display: block;
+  position: absolute;
+  height: 50px;
+  width: 50px;
+  background-color: red;
+}
+
+#B {
+  display: block;
+  position: absolute;
+  height: 200px;
+  width: 100px;
+  background-color: rgba(36, 255, 200, 0.5);
+  transform: rotate(45deg);
+}
+
+#C {
+  display: block;
+  position: absolute;
+  height: 100px;
+  width: 300px;
+  background-color: yellow;
+  transform: translate(40px, 20px);
+}
+
+#D {
+  border: 0 solid white;
+  transform: translate(300px, 300px);
+  position: absolute;
+  height: 100px;
+  width: 50px;
+  background-color: orange;
+}
+
+#D:hover {
+  border-top: 60px solid pink;
+  border-right: 60px solid pink;
+  transition: border-right 2s, border-top 2s linear;
+}
