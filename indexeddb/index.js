@@ -16,9 +16,9 @@ function openDatabase(name, version) {
 function prepareData(db) {
   // Prepare transaction...
   const tx = db.transaction('table', 'readwrite');
-  tx.onerror = event => console.log('tx error', event);
-  tx.onabort = event => console.log('tx abort', event);
-  tx.oncomplete = event => console.log('tx complete', event);
+  tx.onerror = event => console.log('[TRX - error]', event);
+  tx.onabort = event => console.log('[TRX - abort]', event);
+  tx.oncomplete = event => console.log('[TRX - complete]', event);
 
   // Write some data.
   const store = tx.objectStore('table');
@@ -35,18 +35,18 @@ function doExample0(db) {
     // Prepare transaction...
     const tx = db.transaction('table', 'readwrite');
     tx.onerror = event => {
-      console.log('tx error', tx.error);
-      console.log('tx error (event target error)', event.target.error);
+      console.log('[TRX - error] tx.error', tx.error);
+      console.log('[TRX - error] event.target.error', event.target.error);
     };
-    tx.onabort = event => console.log('tx abort', event);
-    tx.oncomplete = event => console.log('tx complete', event);
+    tx.onabort = event => console.log('[TRX - abort]', event);
+    tx.oncomplete = event => console.log('[TRX - complete]', event);
 
     // Try to get all data.
     const store = tx.objectStore('table');
     const getReq = store.getAll();
-    getReq.onerror = event => console.log('req error', event);
+    getReq.onerror = event => console.log('[REQ - error]', event);
     getReq.onsuccess = v => {
-      console.log('req success', v);
+      console.log('[REQ - success]', v);
       resolve(getReq.result);
     };
   });
@@ -61,18 +61,18 @@ function doExample1(db) {
   // Prepare transaction...
   const tx = db.transaction('table', 'readwrite');
   tx.onerror = event => {
-    console.log('tx error', tx.error);
-    console.log('tx error (event target error)', event.target.error);
+    console.log('[TRX - error] tx.error', tx.error);
+    console.log('[TRX - error] event.target.error', event.target.error);
   };
-  tx.onabort = event => console.log('tx abort', event);
-  tx.oncomplete = event => console.log('tx complete', event);
+  tx.onabort = event => console.log('[TRX - abort]', event);
+  tx.oncomplete = event => console.log('[TRX - complete]', event);
 
   // Try to get all data.
   const store = tx.objectStore('table');
   const getReq = store.getAll();
-  getReq.onerror = event => console.log('req error', event);
+  getReq.onerror = event => console.log('[REQ - error]', event);
   getReq.onsuccess = v => {
-    console.log('req success', v);
+    console.log('[REQ - success]', v);
     // After sucess, abort the transaction
     tx.abort();
   };
@@ -87,11 +87,11 @@ async function doExample2() {
   // Prepare transaction...
   const tx = db.transaction('table', 'readwrite');
   tx.onerror = event => {
-    console.log('tx error', tx.error);
-    console.log('tx error (event target error)', event.target.error);
+    console.log('[TRX - error] tx.error', tx.error);
+    console.log('[TRX - error] event.target.error', event.target.error);
   };
-  tx.onabort = event => console.log('tx abort', event);
-  tx.oncomplete = event => console.log('complete', event);
+  tx.onabort = event => console.log('[TRX - abort]', event);
+  tx.oncomplete = event => console.log('[TRX - complete]', event);
 
   // Abort the transaction
   tx.abort();
@@ -99,8 +99,8 @@ async function doExample2() {
   // Try to get all data.
   const store = tx.objectStore('table');
   const getReq = store.getAll();
-  getReq.onerror = event => console.log('req error', event);
-  getReq.onsuccess = v => console.log('req success', v);
+  getReq.onerror = event => console.log('[REQ - error]', event);
+  getReq.onsuccess = v => console.log('[REQ - success]', v);
 }
 
 // Try to abort the transaction after doing getAll before the request success.
@@ -112,17 +112,17 @@ async function doExample3(db) {
   // Prepare transaction...
   const tx = db.transaction('table', 'readwrite');
   tx.onerror = event => {
-    console.log('tx error', tx.error);
-    console.log('tx error (event target error)', event.target.error);
+    console.log('[TRX - error] tx.error', tx.error);
+    console.log('[TRX - error] event.target.error', event.target.error);
   };
-  tx.onabort = event => console.log('tx abort', event);
-  tx.oncomplete = event => console.log('tx complete', event);
+  tx.onabort = event => console.log('[TRX - abort]', event);
+  tx.oncomplete = event => console.log('[TRX - complete]', event);
 
   // Try to get all data.
   const store = tx.objectStore('table');
   const getReq = store.getAll();
-  getReq.onerror = event => console.log('req error', event);
-  getReq.onsuccess = v => console.log('req success', v);
+  getReq.onerror = event => console.log('[REQ - error]', event);
+  getReq.onsuccess = v => console.log('[REQ - success]', v);
 
   // Abort the transaction
   tx.abort();
@@ -138,26 +138,26 @@ async function doExample3_extra(db) {
   // Prepare transaction...
   const tx = db.transaction('table', 'readwrite');
   tx.onerror = event => {
-    console.log('tx error', tx.error);
-    console.log('tx error (event target error)', event.target.error);
+    console.log('[TRX - error] tx.error', tx.error);
+    console.log('[TRX - error] event.target.error', event.target.error);
   };
   tx.onabort = event => {
-    console.log('tx abort', event);
+    console.log('[TRX - abort]', event);
     // https://developer.mozilla.org/en-US/docs/Web/API/IDBRequest/error
     // https://developer.mozilla.org/en-US/docs/Web/API/IDBTransaction/error
     // https://developer.mozilla.org/en-US/docs/Web/API/IDBTransaction/error_event
     console.log('Are tx.error and reqError identical?', tx.error === reqError, reqError);
   };
-  tx.oncomplete = event => console.log('tx complete', event);
+  tx.oncomplete = event => console.log('[TRX - complete]', event);
 
   // Try to get all data.
   const store = tx.objectStore('table');
   const getReq = store.getAll();
   getReq.onerror = event => {
     reqError = event.target.error;
-    console.log('req error', event);
+    console.log('[REQ - error]', event);
   };
-  getReq.onsuccess = v => console.log('req success', v);
+  getReq.onsuccess = v => console.log('[REQ - success]', v);
 
   // Abort the transaction
   tx.abort();
