@@ -163,3 +163,38 @@ async function doExample3_extra(db) {
   tx.abort();
 }
 
+// Try to abort the transaction before doing getAll.
+// HIDE: Note that error fires before tx.abort event here:
+// Question:
+// - Which events will be triggered? tx.error / tx.abort / tx.complete / req.error / req.success
+//     - HIDE: tx.abort, but there is a DOMException at tx.objectStore('table')
+async function doExample4(db, { cancelError = false }) {
+  // Prepare transaction...
+  const tx = db.transaction('table', 'readwrite');
+  tx.onerror = event => {
+    console.log('[TRX - error] tx.error', tx.error);
+    console.log('[TRX - error] event.target.error', event.target.error);
+  };
+  tx.onabort = event => console.log('[TRX - abort]', event);
+  tx.oncomplete = event => console.log('[TRX - complete]', event);
+
+  const store = tx.objectStore('table');
+  const getReq = store.getAll();
+  getReq.onerror = event => {
+    // Stop propagation if `cancelError` is true. e.g. the error can be handled
+    // without cancelling the transaction.
+    if (cancelError) {
+      console.log('[REQ - error] cancelled', event);
+      event.stopPropagation();
+    } else {
+      console.log('[REQ - error]', event);
+    }
+  };
+  getReq.onsuccess = v => console.log('[REQ - success]', v);
+
+  // Queue, then await, a microtask to allow the request above to start.
+  // await undefined;
+
+  // Abort the transaction after the request has started.
+  tx.abort();
+}
