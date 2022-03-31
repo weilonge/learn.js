@@ -8,7 +8,6 @@ let db;
 
 self.addEventListener('install', function(event) {
   self.skipWaiting();
-  init();
   console.log('[SW] installed');
 });
 
@@ -21,13 +20,20 @@ self.addEventListener('fetch', function(event) {
   return undefined;
 });
 
+self.addEventListener('message', function(event) {
+  db && writeLogToDb(db, `[SW] message: ${event.data}`);
+});
+
+init();
 async function init() {
   db = await openDatabase('testSW', 1);
 
   writeLogToDb(db, '[SW] startWritingTimestamp', version);
-  writeTimestamp(db);
 
-  setInterval(() => {
+  const cb = () => {
     writeTimestamp(db);
-  }, 2000);
+    console.log('setTimeout - polling');
+    setTimeout(cb, 2000);
+  };
+  cb();
 }

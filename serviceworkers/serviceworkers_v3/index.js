@@ -1,4 +1,5 @@
 let db;
+let swr;
 
 navigator.serviceWorker.getRegistrations().then((list) => {
   for(var rr in list){
@@ -9,8 +10,9 @@ navigator.serviceWorker.getRegistrations().then((list) => {
 
 navigator.serviceWorker.register('/worker.js', {
   scope: '/'
-}).then(function(reg) {
+}).then(async function(reg) {
   console.log('◕‿◕', reg);
+  swr = await navigator.serviceWorker.ready;
 }, function(err) {
   console.log('ಠ_ಠ', err);
 });
@@ -25,13 +27,10 @@ window.addEventListener('beforeunload', async () => {
 });
 
 async function init() {
+  const messageDom = document.getElementById('message');
+  messageDom.addEventListener('click', () => sendMessageToSw('Hello, I am from postMessage'));
   const fetchDom = document.getElementById('fetch');
-  fetchDom.addEventListener('click', async () => {
-    const data = await fetch('./hello_world');
-    const initMessage = `[PG] ${(new Date()).toLocaleString()} Fetch Data: ${await data.text()}`;
-    writeLogToDb(db, initMessage);
-    writeLogToDom(initMessage);
-  });
+  fetchDom.addEventListener('click', () => sendFetchRequest());
   const tsDom = document.getElementById('ts');
   db = await openDatabase('testSW', 1);
 
@@ -74,4 +73,16 @@ function writeLogToDom(message) {
   const newLog = document.createElement('div');
   newLog.textContent = message;
   logDom.appendChild(newLog);
+}
+
+async function sendFetchRequest() {
+  const data = await fetch('./hello_world');
+  const initMessage = `[PG] ${(new Date()).toLocaleString()} Fetch Data: ${await data.text()}`;
+  writeLogToDb(db, initMessage);
+  writeLogToDom(initMessage);
+}
+
+
+async function sendMessageToSw(message) {
+  swr.active.postMessage(message);
 }
