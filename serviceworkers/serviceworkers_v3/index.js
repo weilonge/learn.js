@@ -1,5 +1,5 @@
-let db;
-let swr;
+const dbPromise = openDatabase('testSW', 1);
+const swrPromise = navigator.serviceWorker.ready;
 
 navigator.serviceWorker.getRegistrations().then((list) => {
   for(var rr in list){
@@ -7,12 +7,10 @@ navigator.serviceWorker.getRegistrations().then((list) => {
   }
 });
 
-
 navigator.serviceWorker.register('/worker.js', {
   scope: '/'
 }).then(async function(reg) {
   console.log('◕‿◕', reg);
-  swr = await navigator.serviceWorker.ready;
 }, function(err) {
   console.log('ಠ_ಠ', err);
 });
@@ -22,67 +20,86 @@ window.addEventListener('load', () => {
 });
 
 window.addEventListener('beforeunload', async () => {
-  const message = `[PG] Close! ${(new Date()).toLocaleString()} `;
-  await writeLogToDb(db, message);
+  const message = 'Close!';
+  await writePgLogToDb(message);
 });
 
 async function init() {
   const messageDom = document.getElementById('message');
-  messageDom.addEventListener('click', () => sendMessageToSw('Hello, I am from postMessage'));
+  messageDom.addEventListener(
+    'click',
+    () => sendMessageToSw('Hello, I am from postMessage'),
+  );
   const fetchDom = document.getElementById('fetch');
   fetchDom.addEventListener('click', () => sendFetchRequest());
   const tsDom = document.getElementById('ts');
-  db = await openDatabase('testSW', 1);
 
-  const initMessage = `[PG] ${(new Date()).toLocaleString()} init`;
-  writeLogToDb(db, initMessage);
+  const initMessage = 'init';
+  writePgLogToDb(initMessage);
   writeLogToDom(initMessage);
 
-  let isDead = false;
+  let isIdle = false;
 
   setInterval(async () => {
-    const record = await readTimestamp(db);
+    const record = await readTimestamp(await dbPromise);
     if (!record || !record.data) {
       throw new Error('Timestamp is Unavailable!!');
     }
     const { data: ts } = record;
     const now = Date.now();
     if ((now - ts) > 4000) {
-      const message = `[PG] ${(new Date()).toLocaleString()} SW is dead (Last: ${new Date(ts)})`;
+      const message = `SW is idle (Last seen: ${(new Date(ts)).toLocaleString()})`;
       writeLogToDom(message);
 
-      if (!isDead) {
-        writeLogToDb(db, message);
+      if (!isIdle) {
+        writePgLogToDb(message);
       }
-      isDead = true;
+      isIdle = true;
+      tsDom.classList.add('idle');
+      tsDom.classList.remove('awake');
     } else {
-      isDead = false;
+      isIdle = false;
+      tsDom.classList.remove('idle');
+      tsDom.classList.add('awake');
     }
-    tsDom.textContent = new Date(ts);
+    tsDom.textContent = (new Date(ts)).toLocaleString();
   }, 2000);
 }
 
 function closeDevTools() {
-  const message = `[PG] ${(new Date()).toLocaleString()} Close DevTools`;
+  const message = `Close DevTools`;
   writeLogToDom(message);
-  writeLogToDb(db, message);
-}
-
-function writeLogToDom(message) {
-  const logDom = document.getElementById('log');
-  const newLog = document.createElement('div');
-  newLog.textContent = message;
-  logDom.appendChild(newLog);
+  writePgLogToDb(message);
 }
 
 async function sendFetchRequest() {
   const data = await fetch('./hello_world');
-  const initMessage = `[PG] ${(new Date()).toLocaleString()} Fetch Data: ${await data.text()}`;
-  writeLogToDb(db, initMessage);
-  writeLogToDom(initMessage);
+  const message = `Fetch Data: ${await data.text()}`;
+  writePgLogToDb(message);
+  writeLogToDom(message);
 }
 
-
 async function sendMessageToSw(message) {
-  swr.active.postMessage(message);
+  const _message = `Send message: ${message}`;
+  (await swrPromise).active.postMessage(message);
+  writePgLogToDb(_message);
+  writeLogToDom(_message);
+}
+
+async function writePgLogToDb(message) {
+  return writeLogToDb(
+    await dbPromise,
+    `[PG][${(new Date()).toLocaleString()}] ${message}`,
+  );
+}
+
+function writeLogToDom(message) {
+  const autoscrollDom = document.getElementById('autoscroll');
+  const logDom = document.getElementById('log');
+  const newLog = document.createElement('div');
+  newLog.textContent = `[PG][${(new Date()).toLocaleString()}] ${message}`;
+  logDom.appendChild(newLog);
+  if (autoscrollDom.checked) {
+    logDom.scrollTop = logDom.scrollHeight;
+  }
 }

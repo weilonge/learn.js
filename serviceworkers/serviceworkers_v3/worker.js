@@ -1,39 +1,60 @@
 // The SW will be shutdown when not in use to save memory,
 // be aware that any global state is likely to disappear
-const version = 1005;
+const version = 1010;
 console.log('[SW] startup', version);
 self.importScripts('db.js');
+const dbPromise = openDatabase('testSW', 1);
+writeSwLogToDb(`startup ${version}`);
 
-let db;
+let messageCount = 0;
+let fetchCount = 0;
+let pollingCount = 0;
 
 self.addEventListener('install', function(event) {
   self.skipWaiting();
-  console.log('[SW] installed');
+  console.log('[SW] installed', version);
+  writeSwLogToDb(`installed ${version}`);
 });
 
 self.addEventListener('activate', function(event) {
-  console.log('[SW] activated');
+  console.log('[SW] activated', version);
+  writeSwLogToDb(`activated ${version}`);
 });
 
+/*
 self.addEventListener('fetch', function(event) {
-  db && writeLogToDb(db, '[SW] fetch');
+  fetchCount++;
+  writeSwLogToDb(`Got a fetch request: ${event.request.url}`);
   return undefined;
 });
+*/
 
 self.addEventListener('message', function(event) {
-  db && writeLogToDb(db, `[SW] message: ${event.data}`);
+  console.log(`[SW] Got a message: ${event.data}`, messageCount, fetchCount, pollingCount);
+  messageCount++;
+  writeSwLogToDb(`Got a message: ${event.data}`);
 });
 
-init();
 async function init() {
-  db = await openDatabase('testSW', 1);
+  console.log('[SW] startWritingTimestamp', version);
+  writeSwLogToDb(`startWritingTimestamp ${version}`);
 
-  writeLogToDb(db, '[SW] startWritingTimestamp', version);
-
-  const cb = () => {
-    writeTimestamp(db);
-    console.log('setTimeout - polling');
+  const cb = async () => {
+    writeTimestamp(await dbPromise);
+    pollingCount++;
+    console.log(
+      '[SW] setTimeout - polling',
+      { messageCount, fetchCount, pollingCount },
+    );
     setTimeout(cb, 2000);
   };
   cb();
+}
+init();
+
+async function writeSwLogToDb(message) {
+  return writeLogToDb(
+    await dbPromise,
+    `[SW][${(new Date()).toLocaleString()}] ${message}`,
+  );
 }
