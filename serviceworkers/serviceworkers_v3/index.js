@@ -7,6 +7,30 @@ navigator.serviceWorker.getRegistrations().then((list) => {
   }
 });
 
+navigator.serviceWorker.oncontrollerchange = () => {
+  console.log(event);
+  const msg = 'ServiceWorkerContainer.oncontrollerchange';
+  writePgLogToDb(msg);
+  writeLogToDom(msg);
+};
+
+swrPromise.then(swr => {
+  swr.onupdatefound = (event) => {
+    console.log(event);
+    const msg = 'ServiceWorkerRegistration.onupdatefound';
+    writePgLogToDb(msg);
+    writeLogToDom(msg);
+  };
+
+  const swActive = swr.active;
+  swActive.onstatechange = (event) => {
+    console.log(event);
+    const msg = `swActive.onstatechange: ${swActive.state}`;
+    writePgLogToDb(msg);
+    writeLogToDom(msg);
+  };
+});
+
 navigator.serviceWorker.register('/worker.js', {
   scope: '/'
 }).then(async function(reg) {
@@ -48,21 +72,22 @@ async function init() {
     const { data: ts } = record;
     const now = Date.now();
     if ((now - ts) > 4000) {
-      const message = `SW is idle (Last seen: ${(new Date(ts)).toLocaleString()})`;
+      const message = `SW is terminated (Last seen: ${(new Date(ts)).toLocaleString()})`;
       writeLogToDom(message);
 
       if (!isIdle) {
         writePgLogToDb(message);
       }
       isIdle = true;
-      tsDom.classList.add('idle');
+      tsDom.classList.add('terminated');
       tsDom.classList.remove('awake');
     } else {
       isIdle = false;
-      tsDom.classList.remove('idle');
+      tsDom.classList.remove('terminated');
       tsDom.classList.add('awake');
     }
-    tsDom.textContent = (new Date(ts)).toLocaleString();
+    const controller = navigator.serviceWorker.controller;
+    tsDom.textContent = `${(new Date(ts)).toLocaleString()} / ${controller ? controller.state : undefined}`;
   }, 2000);
 }
 
