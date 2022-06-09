@@ -1,5 +1,4 @@
 const dbPromise = openDatabase('testSW', 1);
-const swrPromise = navigator.serviceWorker.ready;
 
 navigator.serviceWorker.getRegistrations().then((list) => {
   for(var rr in list){
@@ -7,14 +6,44 @@ navigator.serviceWorker.getRegistrations().then((list) => {
   }
 });
 
+let activatedSw;
+
 navigator.serviceWorker.oncontrollerchange = () => {
   console.log(event);
   const msg = 'ServiceWorkerContainer.oncontrollerchange';
   writePgLogToDb(msg);
   writeLogToDom(msg);
+  waitUntilWorkerActivated(navigator.serviceWorker.controller).then(() => {
+    activatedSw = navigator.serviceWorker.controller;
+  });
 };
 
-swrPromise.then(swr => {
+async function waitUntilWorkerActivated(worker) {
+  return new Promise(resolve => {
+    if (worker.state === 'activated') {
+      const msg = `Already activated: ${worker.state}`;
+      writePgLogToDb(msg);
+      writeLogToDom(msg);
+      resolve();
+      return;
+    }
+    worker.addEventListener('statechange', () => {
+      const msg = `swActive.onstatechange: ${worker.state}`;
+      writePgLogToDb(msg);
+      writeLogToDom(msg);
+      if (worker.state === 'activated') {
+        resolve();
+      }
+    });
+  });
+}
+
+navigator.serviceWorker.ready.then(swr => {
+  const swActive = swr.active;
+  const msg = `swr is ready, state: ${swActive.state}`;
+  writePgLogToDb(msg);
+  writeLogToDom(msg);
+
   swr.onupdatefound = (event) => {
     console.log(event);
     const msg = 'ServiceWorkerRegistration.onupdatefound';
@@ -22,13 +51,9 @@ swrPromise.then(swr => {
     writeLogToDom(msg);
   };
 
-  const swActive = swr.active;
-  swActive.onstatechange = (event) => {
-    console.log(event);
-    const msg = `swActive.onstatechange: ${swActive.state}`;
-    writePgLogToDb(msg);
-    writeLogToDom(msg);
-  };
+  waitUntilWorkerActivated(swActive).then(() => {
+    activatedSw = swActive;
+  });
 });
 
 navigator.serviceWorker.register('/worker.js', {
@@ -106,7 +131,7 @@ async function sendFetchRequest() {
 
 async function sendMessageToSw(message) {
   const _message = `Send message: ${message}`;
-  (await swrPromise).active.postMessage(message);
+  activatedSw.postMessage(message);
   writePgLogToDb(_message);
   writeLogToDom(_message);
 }
