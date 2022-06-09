@@ -1,0 +1,23 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.tab-bar {
+  width: 500px;
+  display: flex;
+  background-color: gray;
+}
+
+.tab {
+  text-align: center;
+  margin: 2px;
+  width: 80px;
+  background-color: orange;
+}
+
+.tab.moving {
+  background-color: red;
+  opacity: 0.6;
+  color: white;
+}
