@@ -36,6 +36,38 @@ self.addEventListener('message', function(event) {
   writeSwLogToDb(`Got a message: ${event.data}`);
 });
 
+self.addEventListener('notificationclick', async (event) => {
+  console.log(event.notification);
+  console.log(self.clients);
+
+  const clientList = await event.waitUntil(self.clients.matchAll({
+    type: "window"
+  }));
+
+  writeSwLogToDb(`Got ${clientList == null ? undefined : clientList.length} clients`);
+
+  if (clientList == null || clientList.length === 0) {
+    writeSwLogToDb(`clientList is empty: ${clientList}`);
+    event.notification.close();
+    writeSwLogToDb(`openWindow`);
+    if (self.clients.openWindow) {
+      self.clients.openWindow('/');
+    }
+    return;
+  }
+  for (const client of clientList) {
+    writeSwLogToDb(`focus on a client.`);
+    if (client.url === '/' && client.focus) {
+      return client.focus();
+    }
+  }
+});
+
+self.addEventListener('notificationclose', function(e) {
+  const notification = e.notification;
+  writeSwLogToDb(`Notification closed: ${notification.body}`);
+});
+
 async function init() {
   console.log('[SW] startWritingTimestamp', version);
   writeSwLogToDb(`startWritingTimestamp ${version}`);

@@ -56,6 +56,8 @@ async function init() {
   );
   const fetchDom = document.getElementById('fetch');
   fetchDom.addEventListener('click', () => sendFetchRequest());
+  const notificationDom = document.getElementById('notification');
+  notificationDom.addEventListener('click', () => showNotification());
   const tsDom = document.getElementById('ts');
 
   const initMessage = 'init';
@@ -109,6 +111,24 @@ async function sendMessageToSw(message) {
   (await swrPromise).active.postMessage(message);
   writePgLogToDb(_message);
   writeLogToDom(_message);
+}
+
+async function showNotification() {
+  const result = await new Promise(resolve => {
+    Notification.requestPermission(resolve);
+  });
+  console.log('result', result);
+  if (result !== 'granted') {
+    return;
+  }
+
+  swrPromise.then(function(registration) {
+    registration.showNotification('Vibration Sample', {
+      body: `Buzz! Buzz! ${Date.now()}`,
+      vibrate: [200, 100, 200, 100, 200, 100, 200],
+      tag: 'vibration-sample'
+    });
+  });
 }
 
 async function writePgLogToDb(message) {
