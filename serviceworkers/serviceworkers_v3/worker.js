@@ -1,6 +1,6 @@
 // The SW will be shutdown when not in use to save memory,
 // be aware that any global state is likely to disappear
-const version = 1017;
+const version = 1050;
 console.log('[SW] startup', version);
 self.importScripts('db.js');
 const dbPromise = openDatabase('testSW', 1);
@@ -22,7 +22,29 @@ self.addEventListener('activate', function(event) {
   writeSwLogToDb(`activated ${version}`);
 });
 
+console.log('Hello', version);
 self.addEventListener('fetch', function(event) {
+  if (event.request.mode === 'navigate') {
+    console.log('Hello');
+    throw new Error('[Error] 123123123');
+    /*
+    const p = (new Promise((resolve, reject) => {
+      throw new Error('My Another Dummy Error 12345');
+      reject(new Error('Dummy'));
+    })).catch(error => {
+      if (event.request.mode === 'navigate') {
+        console.log('[Error A] fallback to fetch', error);
+        getExtraErrorData(error, event.request.url).then(extra => {
+          console.log('[Error B]', extra);
+        });
+        throw new Error('[Error D] Another dummy  error', error);
+      }
+      return fetch(event.request);
+    });
+    event.respondWith(p);
+    return;
+    */
+  }
   fetchCount++;
   const msg = `Got a fetch request: ${event.request.url} / ${messageCount}, ${fetchCount}, ${pollingCount}`;
   console.log('[SW]', msg);
@@ -60,4 +82,22 @@ async function writeSwLogToDb(message) {
     await dbPromise,
     `[SW][${(new Date()).toLocaleString()}] ${message}`,
   );
+}
+
+async function getExtraErrorData(e, requestUrl) {
+  console.log('[Error C] fallback to fetch', e);
+  throw new Error('Another dummy  error', e);
+  const extraEntries = [['requestUrl', requestUrl]];
+
+  if (!(e instanceof Error)) {
+    return new Map(extraEntries);
+  }
+
+  if (/quota/i.test(e.message)) {
+    const result = await navigator.storage?.estimate?.();
+    if (result) {
+      extraEntries.push(...Object.entries(result));
+    }
+  }
+  return new Map(extraEntries);
 }
